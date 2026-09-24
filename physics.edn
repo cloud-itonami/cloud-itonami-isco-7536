@@ -1,0 +1,34 @@
+;; What this vertical's robot physically does, declared for
+;; kotoba.robotics.process (kotoba-lang/robotics). `kbb -M:physics` runs it.
+;;
+;; README "Robotics premise": a workshop scheduling/logistics coordination
+;; robot schedules the shoemaking crew, logs commissions and coordinates
+;; leather/sole/adhesive supply; it never makes shoes. Its physical work is
+;; moving work in progress: a rack trolley carries lasted shoes between
+;; stations, and an arm places lasts onto the rack shelves.
+;;
+;; Every number without a cited source is marked `estimate` in its :basis.
+;; Replacing an estimate with a sourced value is this bot's growth work.
+{:physics/schema "itonami.physical-ai.spec.v1"
+ :repo "cloud-itonami/cloud-itonami-isco-7536"
+ :cases
+ [{:id :shoe-rack-trolley
+   :kind :transport
+   :procedure "rack trolley carries a tall rack of lasted shoes from the lasting station to the sole-press station"
+   :params {:mass-kg 45.0 :distance-m 15.0 :v-max-mps 0.8 :a-max-mps2 0.5
+            :brake-decel-mps2 2.0 :drive-force-n 120.0 :crr 0.02
+            :cog-height-m 0.60 :support-half-length-m 0.30
+            :payload-cog-height-m 1.20 :max-time-s 600.0}
+   :sweep {:param :payload-kg :values [10.0 20.0 30.0 45.0 60.0 90.0]}
+   :quantity :min-tipover-margin
+   :limit {:min 0.3 :basis "estimate: 30 % tip-over reserve for a tall shoe rack when the trolley makes an emergency stop at 2 m/s²"}
+   :boundary {:lo 1.0 :hi 200.0}}
+  {:id :last-onto-rack
+   :kind :manipulator
+   :procedure "arm lifts a lasted shoe from the conveyor onto the top shelf of the rack"
+   :params {:l1-m 0.45 :l2-m 0.40 :m1-kg 3.5 :m2-kg 2.5 :payload-kg 1.2
+            :from [0.50 0.05] :to [0.20 0.75] :steps 400}
+   :sweep {:param :duration-s :values [0.6 0.8 1.0 1.5 2.0]}
+   :quantity :peak-tau1-nm
+   :limit {:max 40.0 :basis "estimate: continuous shoulder torque of a ~3-5 kg-class collaborative arm"}
+   :boundary {:lo 0.2 :hi 3.0}}]}
